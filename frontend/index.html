@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Olympus</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A227;
+  --gold-dim: #8B6B3E;
+  --gold-light: #F0DFA0;
+  --ink: #1A1610;
+  --ink-mid: #3D3526;
+  --ink-soft: #6B5D3F;
+  --bg: #F4F1E8;
+  --bg-card: #FDFAF3;
+  --bg-card2: #FAF6EE;
+  --border: rgba(201,162,39,0.2);
+  --border-strong: rgba(201,162,39,0.45);
+  --meter-bg: rgba(201,162,39,0.12);
+  --shadow: 0 2px 20px rgba(26,22,16,0.08);
+  --transition: 0.3s ease;
+}
+[data-theme="dark"] {
+  --gold: #D4A847;
+  --gold-dim: #C9A227;
+  --gold-light: #3D3010;
+  --ink: #F0EAD8;
+  --ink-mid: #D8CCAA;
+  --ink-soft: #A8956A;
+  --bg: #18202D;
+  --bg-card: #1E2736;
+  --bg-card2: #232D3F;
+  --border: rgba(212,168,71,0.15);
+  --border-strong: rgba(212,168,71,0.35);
+  --meter-bg: rgba(212,168,71,0.1);
+  --shadow: 0 2px 20px rgba(0,0,0,0.3);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'EB Garamond', Georgia, serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+/* ── Theme Toggle ── */
+.theme-toggle {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.5rem;
+  z-index: 100;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 2rem;
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  font-family: 'EB Garamond', serif;
+  font-size: 13px;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.theme-toggle:hover { border-color: var(--gold); color: var(--gold); }
+.theme-toggle svg { width: 14px; height: 14px; fill: currentColor; }
+
+/* ── Header ── */
+.header {
+  text-align: center;
+  padding: 4rem 1.5rem 2.5rem;
+  position: relative;
+}
+.header::before, .header::after {
+  content: '';
+  display: block;
+  width: 120px;
+  height: 1px;
+  background: var(--border-strong);
+  margin: 0 auto;
+}
+.header::before { margin-bottom: 2rem; }
+.header::after { margin-top: 2rem; }
+.logo {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2.8rem, 8vw, 5.5rem);
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  position: relative;
+  display: inline-block;
+}
+.logo-decoration {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -10px;
+  width: 80%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.tagline {
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  font-family: 'Cinzel', serif;
+  margin-top: 1.25rem;
+}
+
+/* ── Search ── */
+.search-wrap {
+  max-width: 680px;
+  margin: 0 auto 3rem;
+  padding: 0 1.5rem;
+}
+.search-box {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  background: var(--bg-card);
+  overflow: hidden;
+  transition: box-shadow var(--transition), border-color var(--transition);
+}
+.search-box:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,162,39,0.12);
+}
+.search-input {
+  flex: 1;
+  padding: 1rem 1.25rem;
+  border: none;
+  background: transparent;
+  font-family: 'EB Garamond', serif;
+  font-size: 17px;
+  color: var(--ink);
+  outline: none;
+  min-width: 0;
+}
+.search-input::placeholder { color: var(--ink-soft); opacity: 0.6; }
+.search-btn {
+  padding: 0 1.5rem;
+  background: var(--gold);
+  border: none;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink);
+  font-weight: 600;
+  transition: background var(--transition), opacity var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.search-btn:hover { opacity: 0.88; }
+.search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Oracle Loading ── */
+.oracle-loading {
+  display: none;
+  max-width: 900px;
+  margin: 0 auto 2.5rem;
+  padding: 0 1.5rem;
+}
+.oracle-loading.visible { display: block; }
+.oracle-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  border-left: 3px solid var(--gold);
+}
+.oracle-line {
+  font-size: 14px;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.oracle-line.active { opacity: 1; transform: translateY(0); }
+.oracle-line.done { opacity: 0.4; }
+.oracle-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.oracle-line.done .oracle-dot {
+  animation: none;
+  background: var(--ink-soft);
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.7); }
+}
+
+/* ── Council ── */
+.council-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+  display: none;
+}
+.council-wrap.visible { display: block; }
+
+.panelists {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+@media (max-width: 700px) {
+  .panelists { grid-template-columns: 1fr; }
+}
+
+.god-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1.25rem;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease, border-color var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.god-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gold);
+  opacity: 0.5;
+}
+.god-card.athena::before { background: #264C73; opacity: 0.8; }
+.god-card.apollo::before { background: #C9A227; opacity: 0.8; }
+.god-card.hermes::before { background: #6B7A45; opacity: 0.8; }
+.god-card.visible { opacity: 1; transform: translateY(0); }
+
+.god-name {
+  font-family: 'Cinzel', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 2px;
+  letter-spacing: 0.08em;
+}
+.god-title {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 1rem;
+  font-family: 'Cinzel', serif;
+}
+.god-answer {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ink-mid);
+  min-height: 60px;
+}
+.god-answer.loading {
+  color: var(--ink-soft);
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* ── Zeus Section ── */
+.zeus-wrap {
+  background: var(--bg-card2);
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  padding: 1.75rem;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s;
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 2rem;
+  align-items: start;
+}
+.zeus-wrap.visible { opacity: 1; transform: translateY(0); }
+@media (max-width: 700px) {
+  .zeus-wrap { grid-template-columns: 1fr; }
+}
+
+.zeus-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.zeus-name {
+  font-family: 'Cinzel', serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.1em;
+}
+.zeus-divider {
+  flex: 1;
+  height: 1px;
+  background: var(--border-strong);
+}
+.zeus-label {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.zeus-answer {
+  font-size: 16px;
+  line-height: 1.85;
+  color: var(--ink-mid);
+}
+.zeus-answer.loading {
+  color: var(--ink-soft);
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* ── Agreement Meter ── */
+.meter-panel {
+  border-left: 1px solid var(--border);
+  padding-left: 1.75rem;
+}
+@media (max-width: 700px) {
+  .meter-panel {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding-left: 0;
+    padding-top: 1.25rem;
+  }
+}
+.meter-title {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 1rem;
+}
+.meter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0.75rem;
+}
+.meter-god-name {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  color: var(--ink-soft);
+  min-width: 58px;
+  letter-spacing: 0.06em;
+}
+.meter-bar-track {
+  flex: 1;
+  height: 5px;
+  background: var(--meter-bg);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.meter-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--gold);
+  width: 0;
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.meter-bar-fill.athena { background: #264C73; }
+.meter-bar-fill.apollo { background: #C9A227; }
+.meter-bar-fill.hermes { background: #6B7A45; }
+.meter-pct {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  color: var(--ink-mid);
+  min-width: 32px;
+  text-align: right;
+}
+.meter-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.75rem 0;
+}
+.meter-overall-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.meter-overall-label {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.06em;
+}
+.meter-overall-score {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* ── Divider ── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.section-divider::before, .section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.section-divider span {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  white-space: nowrap;
+}
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--ink-soft);
+  opacity: 0.5;
+  border-top: 1px solid var(--border);
+  margin-top: 2rem;
+}
+
+/* ── Error ── */
+.error-msg {
+  display: none;
+  max-width: 680px;
+  margin: 0 auto 2rem;
+  padding: 0 1.5rem;
+}
+.error-msg.visible { display: block; }
+.error-inner {
+  padding: 1rem 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid rgba(163,45,45,0.3);
+  border-radius: 3px;
+  font-size: 14px;
+  color: #A32D2D;
+  [data-theme="dark"] & { color: #F09595; }
+}
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+  <svg id="theme-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
+  </svg>
+  <span id="theme-label">Dark</span>
+</button>
+
+<header class="header">
+  <div class="logo">
+    OLYMPUS
+    <div class="logo-decoration"></div>
+  </div>
+  <p class="tagline">Council of the Gods</p>
+</header>
+
+<div class="search-wrap">
+  <div class="search-box">
+    <input
+      class="search-input"
+      id="question-input"
+      type="text"
+      placeholder="Ask the council a question..."
+      autocomplete="off"
+    />
+    <button class="search-btn" id="ask-btn" onclick="askCouncil()">Consult</button>
+  </div>
+</div>
+
+<div class="error-msg" id="error-msg">
+  <div class="error-inner" id="error-text"></div>
+</div>
+
+<div class="oracle-loading" id="oracle-loading">
+  <div class="oracle-lines">
+    <div class="oracle-line" id="line-athena">
+      <div class="oracle-dot"></div>
+      <span>Athena consults the scrolls of wisdom...</span>
+    </div>
+    <div class="oracle-line" id="line-apollo">
+      <div class="oracle-dot"></div>
+      <span>Apollo reads the omens in the smoke...</span>
+    </div>
+    <div class="oracle-line" id="line-hermes">
+      <div class="oracle-dot"></div>
+      <span>Hermes races across the halls of Olympus...</span>
+    </div>
+    <div class="oracle-line" id="line-zeus">
+      <div class="oracle-dot"></div>
+      <span>Zeus weighs the council and prepares his verdict...</span>
+    </div>
+  </div>
+</div>
+
+<div class="council-wrap" id="council-wrap">
+
+  <div class="section-divider"><span>The Council</span></div>
+
+  <div class="panelists">
+    <div class="god-card athena" id="card-athena">
+      <div class="god-name">Athena</div>
+      <div class="god-title">Goddess of Wisdom</div>
+      <div class="god-answer loading" id="answer-athena">Consulting the scrolls...</div>
+    </div>
+    <div class="god-card apollo" id="card-apollo">
+      <div class="god-name">Apollo</div>
+      <div class="god-title">God of the Sun</div>
+      <div class="god-answer loading" id="answer-apollo">Reading the omens...</div>
+    </div>
+    <div class="god-card hermes" id="card-hermes">
+      <div class="god-name">Hermes</div>
+      <div class="god-title">Messenger of the Gods</div>
+      <div class="god-answer loading" id="answer-hermes">Racing across Olympus...</div>
+    </div>
+  </div>
+
+  <div class="section-divider"><span>The Verdict</span></div>
+
+  <div class="zeus-wrap" id="zeus-wrap">
+    <div>
+      <div class="zeus-header">
+        <span class="zeus-name">Zeus</span>
+        <div class="zeus-divider"></div>
+        <span class="zeus-label">King of the Gods</span>
+      </div>
+      <div class="zeus-answer loading" id="answer-zeus">Weighing the council...</div>
+    </div>
+    <div class="meter-panel" id="meter-panel">
+      <div class="meter-title">Council Agreement</div>
+      <div class="meter-row">
+        <span class="meter-god-name">Athena</span>
+        <div class="meter-bar-track"><div class="meter-bar-fill athena" id="bar-athena"></div></div>
+        <span class="meter-pct" id="pct-athena">—</span>
+      </div>
+      <div class="meter-row">
+        <span class="meter-god-name">Apollo</span>
+        <div class="meter-bar-track"><div class="meter-bar-fill apollo" id="bar-apollo"></div></div>
+        <span class="meter-pct" id="pct-apollo">—</span>
+      </div>
+      <div class="meter-row">
+        <span class="meter-god-name">Hermes</span>
+        <div class="meter-bar-track"><div class="meter-bar-fill hermes" id="bar-hermes"></div></div>
+        <span class="meter-pct" id="pct-hermes">—</span>
+      </div>
+      <div class="meter-divider"></div>
+      <div class="meter-overall-row">
+        <span class="meter-overall-label">Overall</span>
+        <span class="meter-overall-score" id="pct-overall">—</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer">Olympus &nbsp;·&nbsp; Council of the Gods &nbsp;</footer>
+
+<script>
+const API = 'http://127.0.0.1:8000';
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('theme-label').textContent = isDark ? 'Dark' : 'Light';
+  const icon = document.getElementById('theme-icon');
+  if (isDark) {
+    icon.innerHTML = '<path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>';
+  } else {
+    icon.innerHTML = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>';
+  }
+}
+
+document.getElementById('question-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') askCouncil();
+});
+
+function resetUI() {
+  document.getElementById('error-msg').classList.remove('visible');
+  document.getElementById('oracle-loading').classList.remove('visible');
+  document.getElementById('council-wrap').classList.remove('visible');
+  ['athena','apollo','hermes'].forEach(g => {
+    document.getElementById('card-' + g).classList.remove('visible');
+    const el = document.getElementById('answer-' + g);
+    el.textContent = g === 'athena' ? 'Consulting the scrolls...' : g === 'apollo' ? 'Reading the omens...' : 'Racing across Olympus...';
+    el.classList.add('loading');
+  });
+  document.getElementById('zeus-wrap').classList.remove('visible');
+  const za = document.getElementById('answer-zeus');
+  za.textContent = 'Weighing the council...';
+  za.classList.add('loading');
+  ['athena','apollo','hermes'].forEach(g => {
+    document.getElementById('bar-' + g).style.width = '0';
+    document.getElementById('pct-' + g).textContent = '—';
+  });
+  document.getElementById('pct-overall').textContent = '—';
+  ['line-athena','line-apollo','line-hermes','line-zeus'].forEach(id => {
+    document.getElementById(id).classList.remove('active','done');
+  });
+}
+
+function activateLine(id, prevId) {
+  if (prevId) {
+    const prev = document.getElementById(prevId);
+    prev.classList.remove('active');
+    prev.classList.add('done');
+  }
+  const el = document.getElementById(id);
+  el.classList.add('active');
+}
+
+function setMeter(data) {
+  const gods = ['athena','apollo','hermes'];
+  gods.forEach(g => {
+    const pct = data[g] || 0;
+    setTimeout(() => {
+      document.getElementById('bar-' + g).style.width = pct + '%';
+      document.getElementById('pct-' + g).textContent = pct + '%';
+    }, 300);
+  });
+  const overall = data.overall || 0;
+  setTimeout(() => {
+    document.getElementById('pct-overall').textContent = overall + '%';
+  }, 600);
+}
+
+async function askCouncil() {
+  const input = document.getElementById('question-input');
+  const question = input.value.trim();
+  if (!question) return;
+
+  const btn = document.getElementById('ask-btn');
+  btn.disabled = true;
+  btn.textContent = 'Consulting...';
+
+  resetUI();
+
+  // Show loading
+  const loading = document.getElementById('oracle-loading');
+  loading.classList.add('visible');
+
+  // Animate loading lines
+  setTimeout(() => activateLine('line-athena', null), 200);
+  setTimeout(() => activateLine('line-apollo', 'line-athena'), 2500);
+  setTimeout(() => activateLine('line-hermes', 'line-apollo'), 5000);
+  setTimeout(() => activateLine('line-zeus', 'line-hermes'), 7500);
+
+  try {
+    const res = await fetch(API + '/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question })
+    });
+
+    if (!res.ok) throw new Error('The oracle returned an error. Please try again.');
+    const data = await res.json();
+
+    // Hide loading, show council
+    loading.classList.remove('visible');
+    const council = document.getElementById('council-wrap');
+    council.classList.add('visible');
+
+    // Reveal cards with stagger
+    const gods = ['athena','apollo','hermes'];
+    gods.forEach((g, i) => {
+      setTimeout(() => {
+        const card = document.getElementById('card-' + g);
+        const ansEl = document.getElementById('answer-' + g);
+        card.classList.add('visible');
+        ansEl.classList.remove('loading');
+        ansEl.textContent = data[g] || '—';
+      }, i * 120);
+    });
+
+    // Zeus
+    setTimeout(() => {
+      const zeusWrap = document.getElementById('zeus-wrap');
+      const zeusAns = document.getElementById('answer-zeus');
+      zeusWrap.classList.add('visible');
+      zeusAns.classList.remove('loading');
+      zeusAns.textContent = data.zeus || '—';
+      if (data.meter) setMeter(data.meter);
+    }, 480);
+
+  } catch (err) {
+    loading.classList.remove('visible');
+    const errEl = document.getElementById('error-msg');
+    document.getElementById('error-text').textContent = err.message || 'Something went wrong. Is the backend running?';
+    errEl.classList.add('visible');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Consult';
+  }
+}
+</script>
+</body>
+</html>
