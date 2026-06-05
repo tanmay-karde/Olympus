@@ -21,7 +21,7 @@ app.add_middleware(
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 chroma = chromadb.PersistentClient(path="data/chroma_db")
-collection = chroma.get_collection("olympus")
+collection = chroma.get_or_create_collection("olympus")
 
 # ── Request model ─────────────────────────────────────────
 class Question(BaseModel):
