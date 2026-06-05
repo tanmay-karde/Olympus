@@ -1,3 +1,4 @@
 PyMuPDF==1.27.2.3
 fastapi
 uvicorn
+chromadb
