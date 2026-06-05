@@ -1,43 +1,53 @@
+import json
+import os
+import re
 from pathlib import Path
 
+INPUT_DIR   = "data/processed"
+OUTPUT_FILE = "data/chunks.json"
+CHUNK_SIZE  = 400
+OVERLAP     = 80
 
-def chunk_text(text, chunk_size=1000):
-    paragraphs = text.split("\n\n")
+def clean_text(text):
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
 
-    chunks = []
-    current_chunk = ""
-
-    for para in paragraphs:
-
-        # Skip empty paragraphs
-        if not para.strip():
-            continue
-
-        if len(current_chunk) + len(para) < chunk_size:
-            current_chunk += para + "\n\n"
-        else:
-            chunks.append(current_chunk)
-            current_chunk = para + "\n\n"
-
-    if current_chunk:
-        chunks.append(current_chunk)
-
+def chunk_text(text, source):
+    words   = text.split()
+    chunks  = []
+    start   = 0
+    idx     = 0
+    while start < len(words):
+        end         = start + CHUNK_SIZE
+        chunk_words = words[start:end]
+        if len(chunk_words) >= 50 or idx == 0:
+            chunks.append({
+                "id":          f"{source}__chunk_{idx}",
+                "text":        " ".join(chunk_words),
+                "source":      source,
+                "chunk_index": idx,
+                "word_count":  len(chunk_words),
+            })
+            idx += 1
+        start += CHUNK_SIZE - OVERLAP
     return chunks
 
+def main():
+    files = list(Path(INPUT_DIR).glob("*.txt"))
+    if not files:
+        print(f"[Chunker] No files found in {INPUT_DIR}")
+        return
+    all_chunks = []
+    for path in files:
+        text   = clean_text(path.read_text(encoding="utf-8"))
+        source = path.stem
+        chunks = chunk_text(text, source)
+        all_chunks.extend(chunks)
+        print(f"[Chunker] {path.name} → {len(chunks)} chunks")
+    os.makedirs("data", exist_ok=True)
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(all_chunks, f, ensure_ascii=False)
+    print(f"[Chunker] Done. {len(all_chunks)} total chunks → {OUTPUT_FILE}")
 
-# Test code
 if __name__ == "__main__":
-
-    text = Path(
-        "data/processed/PercyJackson.txt"
-    ).read_text(
-        encoding="utf-8"
-    )
-
-    chunks = chunk_text(text)
-
-    print(f"Total chunks: {len(chunks)}")
-
-    for i, chunk in enumerate(chunks[:3]):
-        print(f"\n--- CHUNK {i+1} ---")
-        print(chunk[:500])
+    main()

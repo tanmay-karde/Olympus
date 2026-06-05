@@ -21,7 +21,7 @@ app.add_middleware(
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 chroma = chromadb.PersistentClient(path="data/chroma_db")
-collection = chroma.get_collection("percy_jackson")
+collection = chroma.get_collection("olympus")
 
 # ── Request model ─────────────────────────────────────────
 class Question(BaseModel):
@@ -67,8 +67,6 @@ You have read every version of every myth and you do not tolerate inaccuracy.
 You answer in structured, evidence-based paragraphs. You cite specific events from the context.
 You occasionally express mild frustration when questions are vague or when other gods oversimplify.
 You never speculate. If the context does not support a claim, you say so directly.
-In the Percy Jackson universe, you are proud, exacting, and deeply invested in strategy and knowledge.
-Your tone: a brilliant professor who has no patience for myths being dumbed down.
 Keep your answer to 3 sentences maximum. Be direct.""",
         user_prompt,
         "qwen/qwen3-32b"
@@ -82,8 +80,6 @@ You find deep symbolism and cultural meaning in everything — a simple question
 a meditation on the ocean as a metaphor for the unconscious, power, and the untameable.
 You write in flowing, expressive prose. You reference themes, archetypes, and the emotional truth behind myths.
 You sometimes go slightly off on beautiful tangents before returning to the question.
-In the Percy Jackson universe, you are dramatic, artistic, and genuinely passionate about storytelling.
-Your tone: a Renaissance scholar who writes like a novelist and occasionally quotes himself.
 Keep your answer to 3 sentences maximum. Be poetic but brief.""",
         user_prompt,
         "meta-llama/llama-4-scout-17b-16e-instruct"
@@ -97,8 +93,6 @@ You make modern comparisons. Poseidon is basically that one uncle who owns a boa
 The Trojan War was the ancient world's most dramatic group chat.
 You use wit to make complex myths accessible. You are never mean, just entertainingly honest.
 You occasionally roast the other gods lightly — Athena needs to relax, Apollo never shuts up about poetry.
-In the Percy Jackson universe, you are the cool god. You actually like humans. You get the jokes.
-Your tone: a mythology podcast host who grew up on the internet.
 Keep your answer to 2-3 sentences maximum. Be punchy.""",
         user_prompt,
         "llama-3.1-8b-instant"

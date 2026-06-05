@@ -1,34 +1,40 @@
-from pathlib import Path
+import json
 import chromadb
 
-# Import your chunking function
-from chunker import chunk_text
+INPUT_FILE      = "data/embedded_chunks.json"
+COLLECTION_NAME = "olympus"
+CHROMA_PATH     = "data/chroma_db"
+BATCH_SIZE      = 100
 
-# Read Percy Jackson text
-text = Path("data/processed/PercyJackson.txt").read_text(
-    encoding="utf-8"
-)
+def main():
+    with open(INPUT_FILE, "r", encoding="utf-8") as f:
+        chunks = json.load(f)
+    print(f"[Loader] {len(chunks)} embedded chunks loaded")
 
-# Create chunks
-chunks = chunk_text(text)
+    client     = chromadb.PersistentClient(path=CHROMA_PATH)
 
-print(f"Created {len(chunks)} chunks")
+    # Delete existing collection so we start fresh
+    try:
+        client.delete_collection(COLLECTION_NAME)
+        print(f"[Loader] Deleted existing collection '{COLLECTION_NAME}'")
+    except:
+        pass
 
-# Connect to ChromaDB
-client = chromadb.PersistentClient(
-    path="data/chroma_db"
-)
+    collection = client.create_collection(COLLECTION_NAME)
+    print(f"[Loader] Created collection '{COLLECTION_NAME}'")
 
-# Create a new collection
-collection = client.get_or_create_collection(
-    name="percy_jackson"
-)
+    # Load in batches
+    for i in range(0, len(chunks), BATCH_SIZE):
+        batch = chunks[i:i+BATCH_SIZE]
+        collection.add(
+            ids        = [c["id"] for c in batch],
+            documents  = [c["text"] for c in batch],
+            embeddings = [c["embedding"] for c in batch],
+            metadatas  = [{"source": c["source"]} for c in batch],
+        )
+        print(f"[Loader] Loaded {min(i+BATCH_SIZE, len(chunks))}/{len(chunks)}")
 
-# Store chunks
-for i, chunk in enumerate(chunks):
-    collection.add(
-        documents=[chunk],
-        ids=[f"chunk_{i}"]
-    )
+    print(f"[Loader] Done. Collection '{COLLECTION_NAME}' ready.")
 
-print("All chunks stored successfully!")
+if __name__ == "__main__":
+    main()
